@@ -93,6 +93,8 @@
 	%ifndef FAMINE_S
 		extern _start
 		extern _string
+		extern _string.signature
+		extern _string.code
 		extern _o_entry
 		extern _force_exit
 		extern _jmp_to_o_entry
@@ -199,6 +201,10 @@
 		extern	_prng
 		extern	_urand
 		extern	_byterpl
+	%endif
+
+	%ifndef UPDATE_POLYMORPH_NUMBER
+		extern _update_polymorph_number
 	%endif
 
 	%ifndef TABLE_S

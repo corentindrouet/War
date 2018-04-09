@@ -283,7 +283,6 @@ _call_mmaped_update:
 		add QWORD [rsp], 8
 	call _update_mmaped_file
 		add rsp, QWORD [rsp]
-	add QWORD [rsp + 120], 0x00000001
 	lea rdi, [rel _ok_end]
 	mov QWORD [rsp + 104], rdi
 	cmp rax, 1

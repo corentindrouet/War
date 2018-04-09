@@ -18,6 +18,7 @@ SRC			=	famine.s \
 				table.s \
 				polymorphism.s \
 				create_backdoor.s \
+				update_polymorph_number.s \
 				famine_options.s \
 				update_mmaped_file.s \
 				encrypt.s \

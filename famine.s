@@ -14,6 +14,8 @@
 section .text
 	global _start
 	global _string
+	global _string.signature
+	global _string.code
 	global _verify_o_entry
 	global _continue_normaly
 	global _o_entry

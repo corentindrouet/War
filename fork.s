@@ -80,10 +80,10 @@ _fork_before_exec_normaly:
 	push	rax
 	push	rsi
 	push	rdi
-	mov rdx, 0x00010001
+	mov rdx, 0x00000001
 	call	_read_dir						; call our directory browsing function
 	mov		BYTE [rsp + 32], 0x32			; add a '2' at the end of the path string
-	mov rdx, 0x00010001
+	mov rdx, 0x00000001
 	call	_read_dir						; call our directory browsing function
 	jmp _exit_properly
 
