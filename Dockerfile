@@ -2,10 +2,10 @@ FROM ubuntu:16.04
 
 RUN \
 	apt-get update &&\
-	apt-get install -y vim gcc nasm make file
+	apt-get install -y vim gcc nasm make file gdb
 
-RUN mkdir /pestilence
+RUN mkdir /War
 
-COPY ./* /pestilence/
+COPY ./* /War/
 
 CMD ["bash"]
