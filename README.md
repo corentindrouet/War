@@ -15,8 +15,13 @@ To check the signature, simply copy/paste the following command :
 - [x] DO NOT re-infect the an already infected file
 - [x] DO NOT run infection if a specific process is running on host
 - [x] DO NOT run infection if the program is launched into gdb, etc
+- [x] Change signature (not randomly) when infecting new binaries
 
 ## Bonus
 - [x] Infect all files from the root directory
 - [ ] Pack the binary with a compression algorithm
-- [ ] Add a secret backdoor (open port, ...)
+- [x] Add a secret backdoor (open port, ...)
+- [x] Exchange parts of the file randomly, without changing virus
+  behavior
+- [x] Change junks instructions randomly, without changing virus
+  behavior
