@@ -71,7 +71,7 @@ _procfile:
 	.len equ $ - _procfile.string
 
 _procname:
-	.string db 'ptdr', 10, 0
+	.string db 'cat', 10, 0
 	.len equ $ - _procname.string
 
 ;; -----------------------------------------------------------------------------------
